@@ -5,6 +5,7 @@
 # **/OLD/** means everything inside of all occurrences of OLD 
 # *.csv means everything that ends in .csv 
 
+.DS_Store
 ######################
 ######################
 ######################

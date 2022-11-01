@@ -12,3 +12,21 @@ Review lmer models used to analyse data thus far <br />
 Explore different types of models other than lmer (e.g., GAMs) to analyse results <br />
 
 Look into types of multivariate analyses we can run (e.g., SEM?) <br />
+
+
+### CB Notes
+
+ Look at mulitple trophic levels with SEM
+ Look at changes in temporal variance (what is our hypothesis? more
+ variance with fluctating? Also more variance with
+ in sync than out of sync? )
+ How to model that, with GAM and look at DF smooth?
+
+ What about changes in variance across treatments?
+
+ Framing around local vs regional stressors.
+ MGMT action easier on the bait pumping. So
+ decision could be around when can pumping have
+ least impact on SG, does it matter if it occurs
+ near floods?
+ So frame as manageable vs unmanageable stressor problem

@@ -2,17 +2,14 @@
 #lmer analysis
 #A. Ostrowski October 31, 2022
 
-
-library(dplyr)
 library(rstatix)
-library(ggplot2)
 library(emmeans)
 library(tidyverse)
 library(lme4)
 library(lmerTest)
 
 #load csv - data without control
-dat <- read.csv("Data_NoControl.csv")
+dat <- read.csv("../Data/Data_NoControl.csv")
 str(dat)
 dat <- data.frame(unclass(dat), stringsAsFactors = TRUE)
 str(dat)
