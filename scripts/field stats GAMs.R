@@ -19,6 +19,15 @@ dat$Plot.ID <- as.factor(dat$Plot.ID)
 dat$Block <- as.factor(dat$Block)
 str(dat)
 
+#data WITH control
+dat <- read.csv("../Data/Data_Control.csv")
+str(dat)
+dat <- data.frame(unclass(dat), stringsAsFactors = TRUE)
+str(dat)
+dat$Plot.ID <- as.factor(dat$Plot.ID)
+dat$Block <- as.factor(dat$Block)
+str(dat)
+
 sort(dat$Week)
 dat$Treatment <- relevel(factor(dat$Treatment), ref = "StaticStatic")
 
@@ -27,8 +36,8 @@ dat$Treatment <- relevel(factor(dat$Treatment), ref = "StaticStatic")
 #shoot density analysis - Gaussian/normal distribution
 #
 
-m1 <- gam(Shoot_density ~ s(Week, by = Block, k = 3) +
-            s(Week, by = Treatment, k = 3) + 
+m1 <- gam(Shoot_density ~ s(Week, by = Block, k = 4) +
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + 
             offset(Day0_density),
           data = dat)
@@ -50,10 +59,10 @@ gam.check(m1)
 # in the number of shoots:
 # density - Day0_density
 
-m1 <- gam(Shoot_density ~ s(Week, by = Block, k = 3) +
+m1 <- gam(Shoot_density ~ s(Week, by = Block, k = 4) +
             Treatment + 
             # The 'by' allows random time trends by blocks
-            s(Week, by = Treatment, k = 3) + 
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + #random intercepts for blocks
             offset(log(Day0_density)),
           #note for poisson we need to log the offset
@@ -74,6 +83,8 @@ summary(m1)
 
 #make nice plots 
 #Treatment effects
+dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
+
 predout <- visreg(m1, xvar = "Week", 
        by = "Treatment",
        scale = "response",
@@ -121,10 +132,10 @@ g1 + g2 + plot_annotation(tag_levels = 'A')
 # So you can try different things now and plot results
 # e.g. see if block interaction matters?
 
-m2 <- gam(Shoot_density ~ s(Week, k = 3) +
+m2 <- gam(Shoot_density ~ s(Week, k = 4) +
             Treatment + 
             # The 'by' allows random time trends by blocks
-            s(Week, by = Treatment, k = 3) + 
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + #random intercepts for blocks
             offset(log(Day0_density)),
           #note for poisson we need to log the offset
@@ -179,14 +190,17 @@ g1 + g2 + plot_annotation(tag_levels = 'A')
 #
 #AO additional response variables - Nov 11, 2022
 #leaf surface area
-m1 <- gam(Leaf_surface_area ~ s(Week, by = Block, k = 3) +
-            s(Week, by = Treatment, k = 3) + 
+sort(dat$Week)
+dat$Treatment <- relevel(factor(dat$Treatment), ref = "StaticStatic")
+
+m1 <- gam(Leaf_surface_area ~ s(Week, by = Block, k = 4) +
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + 
             offset(Day0_surface_area),
           data = dat)
 gam.check(m1)
 
-m2 <- gam(Leaf_surface_area ~ s(Week, by = Block, k = 3) +
+m2 <- gam(Leaf_surface_area ~ s(Week, by = Block, k = 4) +
             Treatment + 
             s(Block, bs = "re") +
             offset(Day0_surface_area),
@@ -194,9 +208,9 @@ m2 <- gam(Leaf_surface_area ~ s(Week, by = Block, k = 3) +
 
 gam.check(m2)
 
-m3 <- gam(Leaf_surface_area ~ s(Week, by = Block, k = 3) +
+m3 <- gam(Leaf_surface_area ~ s(Week, by = Block, k = 4) +
             Treatment + 
-            s(Week, by = Treatment, k = 3) + 
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + 
             offset(Day0_surface_area),
           data = dat)
@@ -293,25 +307,69 @@ g1 + g2 + plot_annotation(tag_levels = 'A')
 #significant effect of block 4 over time
 
 
+#average leaf surface area (not per plot - exclude shoot density)
+sort(dat$Week)
+dat$Treatment <- relevel(factor(dat$Treatment), ref = "StaticStatic")
+
+m1 <- gam(Avg_LSA ~ s(Week, by = Block, k = 4) +
+            Treatment + 
+            # The 'by' allows random time trends by blocks
+            s(Week, by = Treatment, k = 4) + 
+            s(Block, bs = "re") + #random intercepts for blocks
+            offset(Day0_Avg_LSA),
+          data = dat)
+
+gam.check(m1)
+plot(m1)
+summary(m1)
+
+dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
+
+#plots
+#Treatment effects
+predout <- visreg(m1, xvar = "Week", 
+                  by = "Treatment",
+                  scale = "response",
+                  plot = FALSE,
+                  alpha = 0.05) # can plot directly with TRUE here
+# or have more control if you save results and plot with ggplot
+#returns results with 95% CIs (not SEs). 
+
+g1 <- ggplot(predout$fit) +
+  aes(x = Week, y = visregFit, color = Treatment,
+      group = Treatment, fill = Treatment)+ 
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr, ymax = visregUpr),
+              alpha = 0.2, color = NA) +
+  theme_cowplot()+
+  xlab("Week")+
+  ylab("Change in average leaf surface area relative to day 0")
+
+g1
+
+
 #crustacean abundance
-m1 <- gam(Total_crustacean ~ s(Week, by = Block, k = 3) +
-            s(Week, by = Treatment, k = 3) + 
+sort(dat$Week)
+dat$Treatment <- relevel(factor(dat$Treatment), ref = "StaticStatic")
+
+m1 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) +
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + 
             offset(Day0_crustacean),
           data = dat)
 gam.check(m1)
 
-m2 <- gam(Total_crustacean ~ s(Week, by = Block, k = 3) +
+m2 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) +
             Treatment + 
-            s(Week, by = Treatment, k = 3) + 
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + 
             offset(Day0_crustacean),
           data = dat)
 gam.check(m2)
 
 #poisson - this is count data..
-m3 <- gam(Total_crustacean ~ s(Week, by = Block, k = 3) + Treatment + 
-            s(Week, by = Treatment, k = 3) + 
+m3 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+            s(Week, by = Treatment, k = 4) + 
             s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
           family = "poisson",
           data = dat)
@@ -319,7 +377,7 @@ gam.check(m3)
 plot(m3)
 summary(m3)
 
-m4 <- gam(Total_crustacean ~ s(Week, by = Block, k = 3) + Treatment + 
+m4 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
             s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
           family = "poisson",
           data = dat)
@@ -354,6 +412,8 @@ summary(m6)
 
 #plots
 #Treatment effects
+dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
+
 predout <- visreg(m3, xvar = "Week", 
                   by = "Treatment",
                   scale = "response",
@@ -365,7 +425,11 @@ g1 <- ggplot(predout$fit) +
       group = Treatment, fill = Treatment)+ 
   geom_line() + 
   geom_ribbon(aes(ymin = visregLwr, ymax = visregUpr),
-              alpha = 0.2, color = NA)
+              alpha = 0.2, color = NA) +
+  theme_cowplot()+
+  xlab("Week")+
+  ylab("Proportional change in crustacean \n abundance relative to day 0")
+
 g1
 
 #Block effects
@@ -391,3 +455,40 @@ g1 + g2 + plot_annotation(tag_levels = 'A')
 #effect across all treatments
 #static treatment reduces abundance
 #in and out phase treatments indicate greater reduction than static
+
+
+#negative binomial for crustacean model
+#try neagtive binomial distribution
+m7 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+            s(Week, by = Treatment, k = 4) + 
+            s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+          family = nb(),
+          data = dat)
+
+gam.check(m7)
+plot(m7)
+summary(m7)
+
+#plots
+#Treatment effects
+dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
+
+predout <- visreg(m7, xvar = "Week", 
+                  by = "Treatment",
+                  scale = "response",
+                  plot = FALSE,
+                  alpha = 0.05)  
+
+g1 <- ggplot(predout$fit) +
+  aes(x = Week, y = visregFit, color = Treatment,
+      group = Treatment, fill = Treatment)+ 
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr, ymax = visregUpr),
+              alpha = 0.2, color = NA) +
+  theme_cowplot()+
+  xlab("Week")+
+  ylab("Proportional change in crustacean \n abundance relative to day 0")
+
+g1
+
+
