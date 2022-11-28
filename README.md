@@ -7,11 +7,10 @@ This repository contains the data and code to analyse experimental data collecte
 Multiple stressors are ubiquitous in the environment and can degrade ecosystem structure and function. Manipulative experiments aim to identify complex stressor interactions and how they impact the environment, yet we continue to introduce stressors under highly controlled static conditions, despite environmental conditions within ecosystems constantly changing. This approach might lead to inaccurate experimental conclusions and predictions of cumulative stressor effects. Therefore, we test how a seagrass meadow and associated invertebrate community respond to fluctuating (both synchronous and asynchronous) stressors in situ, and are interested in comparing responses to those observed under static stressor conditions.
 
 **TODO List** <br />
-Review lmer models used to analyse data thus far <br />
+Review GAMs and SEMs used to analyse data thus far <br />
 
-Explore different types of models other than lmer (e.g., GAMs) to analyse results <br />
+Explore changes in temporal variance and variance across treatmetns <br />
 
-Look into types of multivariate analyses we can run (e.g., SEM?) <br />
 
 
 ### CB Notes
@@ -30,3 +29,14 @@ Look into types of multivariate analyses we can run (e.g., SEM?) <br />
  least impact on SG, does it matter if it occurs
  near floods?
  So frame as manageable vs unmanageable stressor problem
+ 
+ 
+ ### AO comments on CB notes <br />
+ 
+ Added some initial trial SEM code to look at mechanistic effects. <br />
+ 
+ I like the idea of looking into changes in temporal variance and variance across treatments. <br />
+ I would hypothesise greater variation in fluctuating treatments relative to static, with greater variance over time. <br />
+ 
+ I also like the idea of discussing local stressor management, how physical disturbance can have greater impact on seagrass 
+ during flooding and/or eutrophication events, for example. Will plan to discuss in paper.
