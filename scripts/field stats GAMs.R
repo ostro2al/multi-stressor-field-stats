@@ -492,3 +492,127 @@ g1 <- ggplot(predout$fit) +
 g1
 
 
+
+#
+#AO update - 17.01.2023
+
+#try rootograms for crustacean abundance 
+#The red line shows frequency for sqrt(predictions) and the grey boxes show range 
+#of sqrt(predictions) to sqrt(predictions) - sqrt(observations) frequencies.
+#If the fit is good the grey boxes will range from zero to the red line. 
+#See Kleiber and Zeileis Visualizing Count Data
+
+library(countreg)
+library(MASS)
+library(tidyverse)
+library(mgcv)
+library(visreg)
+library(patchwork)
+
+#load csv
+dat <- read.csv("Data_Control.csv")
+str(dat)
+dat <- data.frame(unclass(dat), stringsAsFactors = TRUE)
+str(dat)
+dat$Plot.ID <- as.factor(dat$Plot.ID)
+dat$Block <- as.factor(dat$Block)
+str(dat)
+
+sort(dat$Week)
+dat$Treatment <- relevel(factor(dat$Treatment), ref = "StaticStatic")
+
+#
+##compare rootograms looking at crustacean gams
+rootogram <- function(yobs, ypred, brks = NA, hanging = FALSE, ...){
+  
+  if (is.na(brks)){
+    brks <- seq(0-0.5, ceiling(max(c(ypred, yobs))) +0.5, by = 1)
+  } 
+  xwd <- diff(brks)[1]/2.1
+  xy <- hist(ypred, breaks = brks, plot = F)
+  xy2 <- hist(yobs, breaks = brks, plot = F)
+  ylwr <-  sqrt(xy$counts) - sqrt(xy2$counts)
+  ylim <- c(min(ylwr), sqrt(max(xy$counts)))
+  xlim <- c(min(brks), max(brks))
+  plot(xy$mids, sqrt(xy$counts), lty = 3, col = 'red', type = 'b', ylim = ylim,
+       xlim = xlim, xlab ='Count', ylab = 'sqrt(Frequency)', ...)
+  
+  if (hanging){
+    rect(xy$mids - xwd, sqrt(xy$counts), xy$mids + xwd,ylwr, col = 'grey')
+  }else{
+    rect(xy$mids - xwd, sqrt(xy2$counts), xy$mids + xwd,0, col = 'grey')
+  }
+  
+  lines(xy$mids, sqrt(xy$counts), lty = 3, type = 'b', pch = 16, col = 'red')
+  abline(h = 0)
+}
+
+#poisson
+m1 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+            s(Week, by = Treatment, k = 4) + 
+            s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+          family = "poisson",
+          data = dat)
+dat$fit <- predict(m1, type = "response")
+with(dat,
+     rootogram(Crustacean_abundance, fit, nbrks = 12))
+
+gam.check(m1)
+plot(m1)
+summary(m1)
+
+#negative binomial
+m2 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+            s(Week, by = Treatment, k = 4) + 
+            s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+          family = nb(),
+          data = dat)
+dat$fit2 <- predict(m2, type = "response")
+with(dat,
+     rootogram(Crustacean_abundance, fit2, nbrks = 12))
+
+gam.check(m2)
+plot(m2)
+summary(m2)
+
+#zero inflated negative binomial - hurdle poisson
+m3 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+            s(Week, by = Treatment, k = 4) + 
+            s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+          family = ziP(),
+          data = dat)
+dat$fit3 <- predict(m3, type = "response")
+with(dat,
+     rootogram(Crustacean_abundance, fit3, nbrks = 12))
+
+gam.check(m3)
+plot(m3)
+summary(m3)
+
+#quasipoisson - seems best fit but still not good
+m4 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+            s(Week, by = Treatment, k = 4) + 
+            s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+          family = "quasipoisson",
+          data = dat)
+dat$fit4 <- predict(m4, type = "response")
+with(dat,
+     rootogram(Crustacean_abundance, fit4, nbrks = 12))
+
+gam.check(m4)
+plot(m4)
+summary(m4)
+
+#hurdle negative binomial
+m5 <- hurdle(formula = gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+                             s(Week, by = Treatment, k = 4) + 
+                             s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+                           family = nb(),
+                           data = dat))
+dat$fit5 <- predict(m5, type = "response")
+with(dat,
+     rootogram(Crustacean_abundance, fit5, nbrks = 12))
+
+
+AIC(m1, m2, m3, m4, m5) #m2 (neg bin) has lowest AIC and BIC
+BIC(m1, m2, m3, m4, m5)
