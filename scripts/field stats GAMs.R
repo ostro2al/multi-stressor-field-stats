@@ -575,6 +575,8 @@ gam.check(m2)
 plot(m2)
 summary(m2)
 
+visreg(m2)
+
 #zero inflated negative binomial - hurdle poisson
 m3 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
             s(Week, by = Treatment, k = 4) + 
