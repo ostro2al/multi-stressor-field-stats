@@ -18,6 +18,45 @@ str(dat)
 dat <- dat %>% na.omit()
 dat
 
+#####--------------------------- ##########
+### CB Psem models
+# - mediation of crustaceans (no direct treatment effect)
+
+m1_pSEM_randomList_CB = psem(
+  lme(Shoot_density ~ Stressor_app + Week, random = ~ 1 | Block, data = dat),
+  lme(Avg_LSA ~ Stressor_app  + Week, random = ~ 1 | Block, data = dat),
+  lme(Crustacean_abundance ~ Shoot_density + Avg_LSA, random = ~ 1 | Block, data = dat),
+  Avg_LSA %~~% Shoot_density
+)
+
+summary(m1_pSEM_randomList_CB, .progressBar = F)
+#suggests week effect needed for crusts
+
+m2_pSEM_randomList_CB = psem(
+  lme(Shoot_density ~ Stressor_app + Week, random = ~ 1 | Block, data = dat),
+  lme(Avg_LSA ~ Stressor_app  + Week, random = ~ 1 | Block, data = dat),
+  lme(Crustacean_abundance ~ Week + Shoot_density + Avg_LSA, random = ~ 1 | Block, data = dat),
+  Avg_LSA %~~% Shoot_density
+)
+
+summary(m2_pSEM_randomList_CB, .progressBar = F)
+#fits ok. 
+plot(m2_pSEM_randomList_CB)
+
+#compare to no week effect on crusts, but with stressor app effect
+
+m3_pSEM_randomList_CB = psem(
+  lme(Shoot_density ~ Stressor_app + Week, random = ~ 1 | Block, data = dat),
+  lme(Avg_LSA ~ Stressor_app  + Week, random = ~ 1 | Block, data = dat),
+  lme(Crustacean_abundance ~ Stressor_app + Shoot_density + Avg_LSA, random = ~ 1 | Block, data = dat),
+  Avg_LSA %~~% Shoot_density
+)
+
+summary(m3_pSEM_randomList_CB, .progressBar = F)
+#doesn't fit
+
+#end cb models
+#####--------------------------- ##########
 
 ### psem 
 #with random block effect
