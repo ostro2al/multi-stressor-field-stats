@@ -8,8 +8,9 @@ library(lavaan)
 library(lme4)
 library(piecewiseSEM)
 library(dplyr)
+library(mgcv)
 
-dat <- read.csv("Data_Control.csv")
+dat <- read.csv("data/Data_Control.csv")
 str(dat)
 dat$Stressor_app <- as.numeric(dat$Stressor_app)
 dat$Week <- as.numeric(dat$Week)
@@ -63,7 +64,7 @@ summary(m3_pSEM_randomList_CB, .progressBar = F)
 #revised psem with random block effect
 
 #load csv with data stacked to include day 0 data
-dat <- read.csv("DataStacked_Control.csv")
+dat <- read.csv("data/DataStacked_Control.csv")
 str(dat)
 dat$Stressor_app <- as.numeric(dat$Stressor_app)
 dat$Week <- as.numeric(dat$Week)
@@ -152,9 +153,9 @@ AIC(m1, m3)
 #
 ##try running pSEM with GAMs 
 str(dat)
-dat$Stressor_app <- as.numeric(dat$Stressor_app)
+dat$Stressor_app <- factor(dat$Stressor_app)
 dat$Week <- as.numeric(dat$Week)
-dat$Block <- as.numeric(dat$Block)
+dat$Block <- factor(dat$Block)
 str(dat)
 dat
 
