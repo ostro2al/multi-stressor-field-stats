@@ -576,7 +576,7 @@ mod3b.AIC
 mod3b.LL<-LL.fit<-sum(mod3b$logLikelihoods)
 mod3b.LL
 
-#compare overall AIC across all models - mod1b and mod3b have lowest AIC
+#compare overall AIC across all models - mod1a and mod3a have lowest AIC
 #mod1a
 #[1] 5349.437
 #mod1b
