@@ -8,9 +8,10 @@ library(mgcv)
 library(dagitty)
 
 #load csv
-dat <- read.csv("../Data/DataStacked_Control.csv")
+#dat <- read.csv("../Data/DataStacked_Control.csv")
+dat <- read.csv("Data_Control.csv")
 str(dat)
-dat$Stressor_app <- as.factor(dat$Stressor_app)
+dat$Treatment <- as.factor(dat$Treatment)
 dat$Week <- as.numeric(dat$Week)
 dat$Block <- as.numeric(dat$Block)
 str(dat)
@@ -87,28 +88,38 @@ MLX2<-function(submodels,saturated.submodels,data){
 #GAM SEM of interest (lowest AIC)
 #model 3
 m3 <- MLX2(submodels=list(
-  gam(Shoot_density ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-        s(Block, bs = "re"), family = "poisson", data = dat),
-  gam(Avg_LSA ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-        s(Block, bs = "re"), data = dat),
-  gam(Crustacean_abundance ~ Stressor_app + Avg_LSA + 
-        s(Shoot_density, k = 4) + s(Week, by = Stressor_app, k = 4) + s(Block, bs = "re"), 
+  gam(Shoot_density ~ s(Week, by = Block, k = 4) +
+        Treatment + s(Week, by = Treatment, k = 4) + 
+        s(Block, bs = "re") + offset(log(Day0_density)),
+      family = "poisson", data = dat),
+  gam(Avg_LSA ~ s(Week, by = Block, k = 4) +
+        Treatment + s(Week, by = Treatment, k = 4) + 
+        s(Block, bs = "re") + offset(Day0_Avg_LSA),
+      data = dat),
+  gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+        s(Week, by = Treatment, k = 4) + s(Shoot_density, k = 4) + Avg_LSA +
+        s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
       family = nb(), data = dat)),
   saturated.submodels=list(
-    gam(Shoot_density ~ s(Week, m = 2, k = 4) + Stressor_app + Avg_LSA + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
+    gam(Shoot_density ~ s(Week, by = Block, k = 4) + Treatment + Avg_LSA + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
           s(Block, bs = "re"), family = "poisson", data = dat),
-    gam(Avg_LSA ~ s(Week, m = 2, k = 4) + Stressor_app + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
+    gam(Avg_LSA ~ s(Week, by = Block, k = 4) + Treatment + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
           s(Block, bs = "re"), data = dat),
-    gam(Crustacean_abundance ~ s(Week, m = 2, k = 4) + Stressor_app + Avg_LSA + s(Shoot_density, k = 4) + 
+    gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + Avg_LSA + s(Shoot_density, k = 4) + 
           s(Week, by = Stressor_app, k = 4) + s(Block, bs = "re"), family = nb(), data = dat)),
      data = dat)
 #3 submodels 
-m3.1 <- gam(Shoot_density ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-              s(Block, bs = "re"), family = "poisson", data = dat)
-m3.2 <- gam(Avg_LSA ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-              s(Block, bs = "re"), data = dat)
-m3.3 <- gam(Crustacean_abundance ~ Stressor_app + Avg_LSA +
-              s(Shoot_density, k = 4) + s(Week, by = Stressor_app, k = 4) + s(Block, bs = "re"), 
+m3.1 <- gam(Shoot_density ~ s(Week, by = Block, k = 4) +
+              Treatment + s(Week, by = Treatment, k = 4) + 
+              s(Block, bs = "re") + offset(log(Day0_density)),
+            family = "poisson", data = dat)
+m3.2 <- gam(Avg_LSA ~ s(Week, by = Block, k = 4) +
+              Treatment + s(Week, by = Treatment, k = 4) + 
+              s(Block, bs = "re") + offset(Day0_Avg_LSA),
+            data = dat)
+m3.3 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
+              s(Week, by = Treatment, k = 4) + s(Shoot_density, k = 4) + Avg_LSA +
+              s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
             family = nb(), data = dat)
 
 #determine direct significant causal paths
@@ -137,29 +148,37 @@ mod3.LL
 #other GAM SEMs tested
 #model 1
 m1 <- MLX2(submodels=list(
-  gam(Shoot_density ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-        s(Block, bs = "re"), family = "poisson", data = dat),
-  gam(Avg_LSA ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-        s(Block, bs = "re"), data = dat),
-  gam(Crustacean_abundance ~ Avg_LSA + 
-        s(Shoot_density, k = 4) + s(Block, bs = "re"), 
+  gam(Shoot_density ~ s(Week, by = Block, k = 4) +
+        Treatment + s(Week, by = Treatment, k = 4) + 
+        s(Block, bs = "re") + offset(log(Day0_density)),
+      family = "poisson", data = dat),
+  gam(Avg_LSA ~ s(Week, by = Block, k = 4) +
+        Treatment + s(Week, by = Treatment, k = 4) + 
+        s(Block, bs = "re") + offset(Day0_Avg_LSA),
+      data = dat),
+  gam(Crustacean_abundance ~ s(Shoot_density, k = 4) + Avg_LSA +
+        s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
       family = nb(), data = dat)),
   saturated.submodels=list(
-    gam(Shoot_density ~ s(Week, m = 2, k = 4) + Stressor_app + Avg_LSA + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
+    gam(Shoot_density ~ s(Week,by = Block, k = 4) + Treatment + Avg_LSA + Crustacean_abundance + s(Week, by = Treatment, k = 4) + 
           s(Block, bs = "re"), family = "poisson", data = dat),
-    gam(Avg_LSA ~ s(Week, m = 2, k = 4) + Stressor_app + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
+    gam(Avg_LSA ~ s(Week, by = Block, k = 4) + Treatment + Crustacean_abundance + s(Week, by = Treatment, k = 4) + 
           s(Block, bs = "re"), data = dat),
-    gam(Crustacean_abundance ~ s(Week, m = 2, k = 4) + Stressor_app + Avg_LSA + 
-          s(Shoot_density, k = 4) + s(Week, by = Stressor_app, k = 4) + s(Block, bs = "re"), 
+    gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + Avg_LSA + 
+          s(Shoot_density, k = 4) + s(Week, by = Treatment, k = 4) + s(Block, bs = "re"), 
         family = nb(), data = dat)),
   data=dat)
 #3 submodels
-m1.1 <-  gam(Shoot_density ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-               s(Block, bs = "re"), family = "poisson", data = dat)
-m1.2 <- gam(Avg_LSA ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-              s(Block, bs = "re"), data = dat)
-m1.3 <-  gam(Crustacean_abundance ~ Avg_LSA + 
-               s(Shoot_density, k = 4) + s(Block, bs = "re"), 
+m1.1 <-  gam(Shoot_density ~ s(Week, by = Block, k = 4) +
+               Treatment + s(Week, by = Treatment, k = 4) + 
+               s(Block, bs = "re") + offset(log(Day0_density)),
+             family = "poisson", data = dat)
+m1.2 <- gam(Avg_LSA ~ s(Week, by = Block, k = 4) +
+              Treatment + s(Week, by = Treatment, k = 4) + 
+              s(Block, bs = "re") + offset(Day0_Avg_LSA),
+            data = dat)
+m1.3 <-  gam(Crustacean_abundance ~ s(Shoot_density, k = 4) +
+             Avg_LSA + s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
              family = nb(), data = dat)
 
 #determine direct significant paths
@@ -187,29 +206,38 @@ mod1.LL
 
 #model 2
 m2 <- MLX2(submodels=list(
-  gam(Shoot_density ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-        s(Block, bs = "re"), family = "poisson", data = dat),
-  gam(Avg_LSA ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-        s(Block, bs = "re"), data = dat),
-  gam(Crustacean_abundance ~ s(Week, m = 2, k = 4) + Avg_LSA + s(Shoot_density, k = 4) + s(Block, bs = "re"), 
+  gam(Shoot_density ~ s(Week, by = Block, k = 4) +
+        Treatment + s(Week, by = Treatment, k = 4) + 
+        s(Block, bs = "re") + offset(log(Day0_density)),
+      family = "poisson", data = dat),
+  gam(Avg_LSA ~ s(Week, by = Block, k = 4) +
+        Treatment + s(Week, by = Treatment, k = 4) + 
+        s(Block, bs = "re") + offset(Day0_Avg_LSA),
+      data = dat),
+  gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + s(Shoot_density, k = 4) + Avg_LSA +
+        s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
       family = nb(), data = dat)),
   saturated.submodels=list(
-    gam(Shoot_density ~ s(Week, m = 2, k = 4) + Stressor_app + Avg_LSA + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
+    gam(Shoot_density ~ s(Week, by = Block, k = 4) + Treatment + Avg_LSA + Crustacean_abundance + s(Week, by = Treatment, k = 4) + 
           s(Block, bs = "re"), family = "poisson", data = dat),
-    gam(Avg_LSA ~ s(Week, m = 2, k = 4) + Stressor_app + Crustacean_abundance + s(Week, by = Stressor_app, k = 4) + 
+    gam(Avg_LSA ~ s(Week, by = Block, k = 4) + Treatment + Crustacean_abundance + s(Week, by = Treatment, k = 4) + 
           s(Block, bs = "re"), data = dat),
-    gam(Crustacean_abundance ~ s(Week, m = 2, k = 4) + Stressor_app + Avg_LSA + 
-          s(Shoot_density, k = 4) + s(Week, by = Stressor_app, k = 4) + s(Block, bs = "re"), 
+    gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + Avg_LSA + 
+          s(Shoot_density, k = 4) + s(Week, by = Treatment, k = 4) + s(Block, bs = "re"), 
         family = nb(), data = dat)),
   data = dat)
 #3 submodels 
-m2.1 <- gam(Shoot_density ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-              s(Block, bs = "re"), family = "poisson", data = dat)
-m2.2 <- gam(Avg_LSA ~ Stressor_app + s(Week, by = Stressor_app, k = 4) + 
-              s(Block, bs = "re"), data = dat)
-m2.3 <-  gam(Crustacean_abundance ~ s(Week, m = 2, k = 4) + Avg_LSA +
-               s(Shoot_density, k = 4) + s(Block, bs = "re"), 
-             family = nb(), data = dat)
+m2.1 <- gam(Shoot_density ~ s(Week, by = Block, k = 4) +
+              Treatment + s(Week, by = Treatment, k = 4) + 
+              s(Block, bs = "re") + offset(log(Day0_density)),
+            family = "poisson", data = dat)
+m2.2 <- gam(Avg_LSA ~ s(Week, by = Block, k = 4) +
+              Treatment + s(Week, by = Treatment, k = 4) + 
+              s(Block, bs = "re") + offset(Day0_Avg_LSA),
+            data = dat)
+m2.3 <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + s(Shoot_density, k = 4) + Avg_LSA +
+              s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+            family = nb(), data = dat)
 
 #determine direct significant paths
 summary(m2.1)
