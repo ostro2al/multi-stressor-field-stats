@@ -8,7 +8,7 @@ library(dagitty)
 library(ggdag)
 
 #read csv
-dat <- read.csv("DataStacked_Control.csv")
+dat <- read.csv("data/DataStacked_Control.csv")
 str(dat)
 dat$Stressor_app <- as.factor(dat$Stressor_app)
 dat$Treatment <- as.factor(dat$Treatment)
@@ -22,11 +22,7 @@ sort(dat$Week)
 #model 1
 m1 <- dagitty( "dag {Treatment -> Shoot_density
                 Week -> Shoot_density
-                Treatment -> Avg_LSA
-                Week -> Avg_LSA
-                Avg_LSA -> Crustacean_abundance
-                Shoot_density -> Crustacean_abundance
-                Avg_LSA <-> Shoot_density
+                x -> Shoot_density
                 }" )
 plot(m1)
 
@@ -100,6 +96,9 @@ m3 <- dagitty( "dag {Treatment -> Shoot_density
                 Avg_LSA -> Crustacean_abundance
                 Shoot_density -> Crustacean_abundance
                 Avg_LSA <-> Shoot_density
+                block -> Shoot_density
+                block -> Avg_LSA
+                block -> Crustacean_abundance
                 }" )
 plot(m3)
 
@@ -123,9 +122,12 @@ ggdag_collider(m3)
 #identify adjustment sets
 adjustmentSets(m3, "Treatment", "Shoot_density", type="minimal")
 adjustmentSets(m3, "Treatment", "Avg_LSA", type="minimal")
+adjustmentSets(m3, "Treatment", "Avg_LSA", type="canonical")
 adjustmentSets(m3, "Week", "Shoot_density", type="minimal")
 adjustmentSets(m3, "Week", "Avg_LSA", type="minimal")
 adjustmentSets(m3, "Week", "Crustacean_abundance", type="minimal")
 adjustmentSets(m3, "Treatment", "Crustacean_abundance", type="minimal")
+adjustmentSets(m3, "Treatment", "Crustacean_abundance", type="canonical")
 adjustmentSets(m3, "Avg_LSA", "Crustacean_abundance", type="minimal")
+adjustmentSets(m3, "Avg_LSA", "Crustacean_abundance", type="canonical")
 adjustmentSets(m3, "Shoot_density", "Crustacean_abundance", type="minimal")
