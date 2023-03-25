@@ -21,7 +21,8 @@ simulate_gam_CIs <- function(model,
                              random_var = NULL,
                              offset = 0,
                              probs = c(0.025, 0.5, 0.975),
-                             nsims = 1000){
+                             nsims = 1000,
+                             func_to_apply = rep("quantile", length(forms))){
   
   #Function to simulate credible intervals for an mgcv GAM
   # 
@@ -41,6 +42,9 @@ simulate_gam_CIs <- function(model,
   # in the lpmatrix. Beware duplicate matches (using grepl here)
   # offset: numeric. offset to add back into predictions
   # probs: probability quantiles for CIs
+  # func_to_apply: defaults to quantiles, other option is to sum
+  # provide a character with same length of forms to 
+  # specify summary function
   #
   #Output: returns a list of dataframes, were each dataframe
   # is prediction intervals for each formula. 
@@ -83,7 +87,13 @@ simulate_gam_CIs <- function(model,
   
   # Compute CIs for each formula and cbind to original dataframe
   effects2 <- lapply(1:nforms, function(i){
-    ztemp <- data.frame(t(apply(effects[[i]], 1, quantile, probs = probs)))
+    if (func_to_apply[i] == "quantile"){
+      ztemp <- data.frame(t(apply(effects[[i]], 1, quantile, probs = probs)))  
+    } else {
+      
+      ztemp <- data.frame(prob = apply(effects[[i]], 1, sum))/nsims  
+    }
+    
     ztemp <- setNames(ztemp, paste0(names(forms)[[i]], names(ztemp)))
     cbind(newdata, ztemp)
   })
