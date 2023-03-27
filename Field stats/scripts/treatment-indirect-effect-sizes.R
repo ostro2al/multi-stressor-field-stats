@@ -12,6 +12,7 @@
 #
 # This should work now, but need to check I did matrix computations right way 
 # around. how can we run a test to check this works ok? 
+#Also have a I done the mean and exp() in the right order? 
 
 library(tidyverse)
 library(mgcv)
@@ -155,8 +156,12 @@ for (i in 1:1000){
 #Indirect effects (ACME - average causal mediation effect)
 # summarize across columns (because we are averaging over different direct 
 # treatment effects to get average mediation effect)
-
-y = apply(apply(exp(indirect_control_mult), c(2,3), mean), 1, 
+# The exp() turns differences on a log scale to multiples. 
+#
+y = indirect_control_mult %>%
+  apply(., c(2,3), mean) %>%
+  exp() %>%
+  apply(., 1, 
       quantile, probs = c(0.025, 0.5, 0.975)) %>%
   t() %>%
   data.frame() %>%
@@ -168,7 +173,10 @@ y[,c(6,2)]
 #Indirect effects (ADE - average direct effect)
 # summarize across rows (because we are averaging over different direct 
 # treatment effects to get average mediation effect)
-x = apply(apply(exp(direct_control_mult), c(1,3), mean), 1, 
+x = direct_control_mult %>%
+  apply(., c(1,3), mean) %>% 
+  exp() %>%
+  apply(., 1, 
       quantile, probs = c(0.025, 0.5, 0.975)) %>%
   t() %>%
   data.frame() %>%
