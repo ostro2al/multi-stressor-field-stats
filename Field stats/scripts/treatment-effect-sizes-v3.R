@@ -11,7 +11,7 @@ library(dagitty)
 
 #NB If you want to/can be bothered recreating your GAM graphs with 
 # credible intervals (won't make much or any difference) then
-# use code below but modify the creatoin of the prediction 
+# use code below but modify the creation of the prediction 
 # dataframe with expand.grid() to get all combinations of 
 # weeks and treatments. Then simulate predictions, calculate quantiles and finally 
 # then plot as normal with ggplot2
@@ -19,7 +19,7 @@ library(dagitty)
 #read csv
 dat <- read.csv("data/Data_Control.csv")
 
-#custon function
+#custom function
 source("scripts/functions-sim-predictions.R")
 
 #
@@ -100,11 +100,78 @@ shoot_density_effects <- gout[[1]] %>% left_join(gout[[2]]) %>%
 
 shoot_density_effects
 
+
 #
 # LSA
 #
 
 #TODO
+#AO trial LSA effects
+m3.2 <- gam(Avg_LSA ~ s(Week, by = Block, k = k_val) +
+              Treatment + s(Week, by = Treatment, k = k_val) + 
+              s(Block, bs = "re") + offset(Day0_Avg_LSA),
+            data = dat)
+
+#
+# Create new dataframe for predictions 
+#
+
+newd2 <- with(dat, data.frame(Week = 6,
+                             Block = 1,
+                             Treatment = unique(Treatment),
+                             Day0_Avg_LSA = mean(Day0_Avg_LSA))
+)
+
+# newd2$pred <- predict(m3.2, newdata = newd2, type = "response")
+# newd2
+
+
+#row IDs for treatments (so we don't mix them up)
+icontrol2 <- which(newd2$Treatment == "Control")
+istatic2 <- which(newd2$Treatment == "StaticStatic")
+
+
+#Predictions with credible intervals
+# A list of formulas to evaluate sample by sample
+# the function then takes quantiles over these outcomes
+# use names if you want the output dataframes and 
+# columns for CIs to be named. 
+
+forms <- c(effects = ~exp(x), #estimate median LSA
+           control_mult = ~ exp(x - x[icontrol2]),
+           #Estimate each treatment as multiple of control
+           static_mult= ~ exp(x - x[istatic2]),
+           #Estimate each treatment as multiple of static
+           prob_control = ~ x<x[icontrol2],
+           #Estimate probability treatment is less than control
+           prob_static = ~ x<x[istatic2])
+#Estimate probability treatment is less than static
+
+#Specify summary functions, ie for effect sizes use quantiles to 
+# get CIs,
+# whereas for inequalities we just want to sum and divide by nsims
+# to get the probability 
+m3.2_functions <- c("quantile","quantile",
+                    "quantile", "sum",
+                    "sum")
+
+gout <- simulate_gam_CIs(m3.2, 
+                         newdata = newd2,
+                         forms = forms, 
+                         random_var = "Block",
+                         offset = mean(dat$Day0_Avg_LSA),
+                         probs = c(0.025, 0.5, 0.975),
+                         nsims = 1000,
+                         func_to_apply = m3.2_functions)
+
+LSA_effects <- gout[[1]] %>% left_join(gout[[2]]) %>%
+  left_join(gout[[3]]) %>%
+  left_join(gout[[4]]) %>%
+  left_join(gout[[5]])
+
+LSA_effects
+
+
 
 
 # ------------ 
@@ -135,12 +202,60 @@ adjustmentSets(m3, "Treatment", "Crustacean_abundance", type="canonical")
 #Condition on week and block to get total traetment effect (via any path)
 # so fit model without shoots and LSA
 
+dat$ln_Day0_crustacean <- log(dat$Day0_crustacean+ 0.01)
 m3_crust_total <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Treatment + 
                         s(Week, by = Treatment, k = 4) + 
-                        s(Block, bs = "re") + offset(log(Day0_crustacean + 0.01)),
+                        s(Block, bs = "re") + offset(ln_Day0_crustacean),
                       family = nb(), data = dat)
 
 #now use simulate_gam_CIs() to get CIs for the total effect of Treatment
+
+newd3 <- with(dat, data.frame(Week = 6,
+                              Block = 1,
+                              Treatment = unique(Treatment),
+                              ln_Day0_crustacean = mean(ln_Day0_crustacean))
+)
+
+#row IDs for treatments (so we don't mix them up)
+icontrol3 <- which(newd3$Treatment == "Control")
+istatic3 <- which(newd3$Treatment == "StaticStatic")
+
+#Predictions with credible intervals
+forms <- c(effects = ~exp(x), #estimate median LSA
+           control_mult = ~ exp(x - x[icontrol3]),
+           #Estimate each treatment as multiple of control
+           static_mult= ~ exp(x - x[istatic3]),
+           #Estimate each treatment as multiple of static
+           prob_control = ~ x<x[icontrol3],
+           #Estimate probability treatment is less than control
+           prob_static = ~ x<x[istatic3])
+#Estimate probability treatment is less than static
+
+#Specify sumamry functions, ie for effect sizes use quantiles to 
+# get CIs,
+# whereas for inequalities we just want to sum and divide by nsims
+# to get the probability 
+m3_crust_total_functions <- c("quantile","quantile",
+                    "quantile", "sum",
+                    "sum")
+
+gout <- simulate_gam_CIs(m3_crust_total, 
+                         newdata = newd3,
+                         forms = forms, 
+                         random_var = "Block",
+                         offset = mean(dat$ln_Day0_crustacean),
+                         probs = c(0.025, 0.5, 0.975),
+                         nsims = 1000,
+                         func_to_apply = m3_crust_total_functions)
+
+crust_total_effects <- gout[[1]] %>% left_join(gout[[2]]) %>%
+  left_join(gout[[3]]) %>%
+  left_join(gout[[4]]) %>%
+  left_join(gout[[5]])
+
+crust_total_effects
+
+
 
 #
 # Direct effects of LSA and treatment
@@ -158,7 +273,7 @@ m3_crust_directs <- gam(Crustacean_abundance ~ s(Week, by = Block, k = 4) + Trea
 #use this model to get direct effects of LSA on crusties (conditional on treatment)
 # use same model to get direct effect of treatment on crusties (conditional on LSA)
 
-newd2 <- with(dat, expand.grid(Week = 6,
+newd4 <- with(dat, expand.grid(Week = 6,
                              Block = 1,
                              Treatment = unique(Treatment),
                              Shoot_density = mean(Shoot_density), 
@@ -177,18 +292,18 @@ newd2 <- with(dat, expand.grid(Week = 6,
 #set your condition, here all results will 
 #be multiples of static treatment and mean LSA
 
-istatic2 <- which(newd2$Treatment == "StaticStatic" & newd2$Avg_LSA == mean(dat$Avg_LSA))
+istatic4 <- which(newd4$Treatment == "StaticStatic" & newd4$Avg_LSA == mean(dat$Avg_LSA))
 
 #Now formula for results relative to static at mean LSA
-forms2 <- c(static_LSA_mult = ~ exp(x - x[istatic2]),
+forms2 <- c(static_LSA_mult = ~ exp(x - x[istatic4]),
            #Estimate each treatment as multiple of static
-           prob_LSA_static = ~ x<x[istatic2])
+           prob_LSA_static = ~ x<x[istatic4])
 #Estimate probability treatment is less than static
 
 forms2_functions <- c("quantile", "sum")
 
 gout <- simulate_gam_CIs(m3_crust_directs, 
-                         newdata = newd2,
+                         newdata = newd4,
                          forms = forms2, 
                          random_var = "Block",
                          offset = mean(dat$ln_Day0_crustacean),
