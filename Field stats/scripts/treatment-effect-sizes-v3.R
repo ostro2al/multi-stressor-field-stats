@@ -137,10 +137,10 @@ istatic2 <- which(newd2$Treatment == "StaticStatic")
 # use names if you want the output dataframes and 
 # columns for CIs to be named. 
 
-forms <- c(effects = ~exp(x), #estimate median LSA
-           control_mult = ~ exp(x - x[icontrol2]),
+forms <- c(effects = ~x, #estimate median LSA
+           control_mult = ~ x / x[icontrol2],
            #Estimate each treatment as multiple of control
-           static_mult= ~ exp(x - x[istatic2]),
+           static_mult= ~ x / x[istatic2],
            #Estimate each treatment as multiple of static
            prob_control = ~ x<x[icontrol2],
            #Estimate probability treatment is less than control
