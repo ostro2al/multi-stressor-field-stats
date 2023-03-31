@@ -311,7 +311,12 @@ gout <- simulate_gam_CIs(m3_crust_directs,
                          nsims = 1000,
                          func_to_apply = forms2_functions)
 
-crust_direct_effects <- gout[[1]] %>% left_join(gout[[2]]) 
+crust_direct_effects <- gout[[1]] %>% left_join(gout[[2]]) %>%
+  left_join(gout[[3]]) %>%
+  left_join(gout[[4]]) %>%
+  left_join(gout[[5]])
+
+crust_direct_effects
 
 #Here are conditional direct effects of treatments
 # relative to the static treatment
@@ -322,6 +327,7 @@ crust_direct_effects[crust_direct_effects$Avg_LSA == mean(dat$Avg_LSA),]
 #mean LSA and 
 # at the static treatment
 crust_direct_effects[crust_direct_effects$Treatment == "StaticStatic",]
+
 
 #
 # UP TO HERE< now get indirect effect of treatment on crusties
