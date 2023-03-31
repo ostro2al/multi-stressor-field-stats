@@ -66,9 +66,64 @@ newd <- with(dat, data.frame(Week = 6,
 )
 
 
-#
+# ----------------------
+# Calculate mean indirect effect to check results 
+# ----------------------
+
+#Use lp matrix method to predict desnity for the average block
+lp_LSA <- predict(m3.2, newdata = newd, type="lpmatrix")
+icol_block <- grepl("Block", colnames(lp_LSA))
+lp_LSA[,icol_block] <- 0
+LSA_mean <- lp_LSA %*% coef(m3.2) + newd$Day0_Avg_LSA
+LSA_mean
+# Should be the same if we turn off the line that sets
+#block effects to zero: 
+predict(m3.2, newdata = newd)
+
+newd2 <- expand.grid(Avg_LSA = as.numeric(LSA_mean),
+                     Treatment = newd$Treatment)
+newd2$Treatment_applied_to_LSA <- rep(newd$Treatment, 4)
+newd2$Week <- 6
+newd2$Block <- 1
+newd2$ln_Day0_crustacean = mean(dat$ln_Day0_crustacean)
+
+newd_temp$Avg_LSA <- as.numeric(LSA_mean)
+Xp_crusties <- predict(m3_crust_directs, 
+                       newdata = newd2, type="lpmatrix") 
+icol_block <- grepl("Block", colnames(Xp_crusties))
+Xp_crusties[,icol_block] <- 0
+lncrustie_mean <- Xp_crusties %*% coef(m3_crust_directs) + newd_temp$ln_Day0_crustacean
+newd2$lncrustie_mean <- as.numeric(lncrustie_mean)
+
+# predict(m3_crust_directs, 
+        # newdata = newd_temp, type = "response")
+#Now apply equation 1 of Imai et al. 2010 
+
+newd3 <- newd2 %>%
+  group_by(Treatment) %>%
+  mutate(CME = exp(lncrustie_mean - lncrustie_mean[Treatment_applied_to_LSA == "Control"])) %>%
+  ungroup() %>%
+  group_by(Treatment_applied_to_LSA) %>%
+  mutate(DE = exp(lncrustie_mean - lncrustie_mean[Treatment == "Control"])) %>%
+  ungroup()
+data.frame(newd3)
+
+#ACME: average across different direct effects
+newd3 %>%
+  group_by(Treatment_applied_to_LSA) %>%
+  summarize(mean(CME))
+
+#Average direct effect ADE
+newd3 %>%
+  group_by(Treatment) %>%
+  summarize(mean(DE))
+
+#Note these values are biased, so we should use values below
+
+
+# ------------------
 #Predict LSA
-#
+# ------------------
 Xp_LSA <- predict(m3.2, newdata = newd, type="lpmatrix") 
 
 #Set block effects to zero
