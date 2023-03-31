@@ -9,7 +9,7 @@ library(dagitty)
 
 #load csv
 #dat <- read.csv("../Data/DataStacked_Control.csv")
-dat <- read.csv("Data_Control.csv")
+dat <- read.csv("data/Data_Control.csv")
 str(dat)
 dat$Treatment <- as.factor(dat$Treatment)
 dat$Week <- as.numeric(dat$Week)
