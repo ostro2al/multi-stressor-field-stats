@@ -8,7 +8,16 @@ library(ggplot2)
 #read csv
 dat <- read.csv("data/Data_Control.csv")
 
+#plot raw data for week 6
+dat %>%
+  filter(Week == 6) %>%
+  ggplot()+
+  (aes(x = Avg_LSA, y = Crustacean_abundance))+
+  facet_grid(~Treatment)+
+  geom_point() +
+  theme_cowplot()
 
+#get mean data for LSA and crust
 options(tibble.print_min = Inf)
 dat2 <- dat %>% 
   group_by(Treatment, Week) %>%
@@ -27,6 +36,7 @@ dat3
 dat4 <- cbind(dat2, dat3)
 dat4
 
+#mean data
 dat4 %>%
   filter(Week == 6) %>%
   ggplot()+
@@ -34,13 +44,3 @@ dat4 %>%
   #facet_grid(~Treatment)+
   geom_point() +
   theme_cowplot()
-
-dat %>%
-  filter(Week == 6) %>%
-  ggplot()+
-  (aes(x = Avg_LSA, y = Crustacean_abundance))+
-  facet_grid(~Treatment)+
-  geom_point() +
-  theme_cowplot()
-
-
