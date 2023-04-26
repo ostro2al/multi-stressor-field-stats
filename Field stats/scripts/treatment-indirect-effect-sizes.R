@@ -87,12 +87,12 @@ newd2$Week <- 6
 newd2$Block <- 1
 newd2$ln_Day0_crustacean = mean(dat$ln_Day0_crustacean)
 
-newd_temp$Avg_LSA <- as.numeric(LSA_mean)
+newd2$Avg_LSA <- as.numeric(LSA_mean)
 Xp_crusties <- predict(m3_crust_directs, 
                        newdata = newd2, type="lpmatrix") 
 icol_block <- grepl("Block", colnames(Xp_crusties))
 Xp_crusties[,icol_block] <- 0
-lncrustie_mean <- Xp_crusties %*% coef(m3_crust_directs) + newd_temp$ln_Day0_crustacean
+lncrustie_mean <- Xp_crusties %*% coef(m3_crust_directs) + newd2$ln_Day0_crustacean
 newd2$lncrustie_mean <- as.numeric(lncrustie_mean)
 
 # predict(m3_crust_directs, 
