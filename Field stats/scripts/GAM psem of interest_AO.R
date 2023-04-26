@@ -9,11 +9,13 @@ library(dagitty)
 
 #load csv
 #dat <- read.csv("../Data/DataStacked_Control.csv")
-dat <- read.csv("Data_Control.csv")
+dat <- read.csv("data/Data_Control.csv")
 str(dat)
-dat$Treatment <- as.factor(dat$Treatment)
+dat <- data.frame(unclass(dat), stringsAsFactors = TRUE)
+str(dat)
+dat$Plot.ID <- as.factor(dat$Plot.ID)
+dat$Block <- as.factor(dat$Block)
 dat$Week <- as.numeric(dat$Week)
-dat$Block <- as.numeric(dat$Block)
 str(dat)
 
 sort(dat$Week)
