@@ -293,14 +293,16 @@ newd4 <- with(dat, expand.grid(Week = 6,
 #be multiples of static treatment and mean LSA
 
 istatic4 <- which(newd4$Treatment == "StaticStatic" & newd4$Avg_LSA == mean(dat$Avg_LSA))
+icontrol4 <- which(newd4$Treatment == "Control" & newd4$Avg_LSA == mean(dat$Avg_LSA))
 
 #Now formula for results relative to static at mean LSA
 forms2 <- c(static_LSA_mult = ~ exp(x - x[istatic4]),
            #Estimate each treatment as multiple of static
-           prob_LSA_static = ~ x<x[istatic4])
+           c(control_LSA_mult = ~ exp(x - x[icontrol4]),
+           prob_LSA_static = ~ x<x[istatic4]))
 #Estimate probability treatment is less than static
 
-forms2_functions <- c("quantile", "sum")
+forms2_functions <- c("quantile", "quantile", "sum")
 
 gout <- simulate_gam_CIs(m3_crust_directs, 
                          newdata = newd4,
@@ -311,10 +313,7 @@ gout <- simulate_gam_CIs(m3_crust_directs,
                          nsims = 1000,
                          func_to_apply = forms2_functions)
 
-crust_direct_effects <- gout[[1]] %>% left_join(gout[[2]]) %>%
-  left_join(gout[[3]]) %>%
-  left_join(gout[[4]]) %>%
-  left_join(gout[[5]])
+crust_direct_effects <- gout[[1]] %>% left_join(gout[[2]]) 
 
 crust_direct_effects
 
@@ -328,6 +327,7 @@ crust_direct_effects[crust_direct_effects$Avg_LSA == mean(dat$Avg_LSA),]
 # at the static treatment
 crust_direct_effects[crust_direct_effects$Treatment == "StaticStatic",]
 
+crust_direct_effects[crust_direct_effects$Treatment == "Control",]
 
 #
 # UP TO HERE< now get indirect effect of treatment on crusties
