@@ -301,16 +301,15 @@ iinphase4 <- which(newd4$Treatment == "InPhase" & newd4$Avg_LSA == mean(dat$Avg_
 
 #Now formula for results relative to static at mean LSA
 forms2 <- c(static_LSA_mult = ~ exp(x - x[istatic4]),
-            inphase_LSA_mult = ~ exp(x - x[iinphase4]),
+            iinphase_LSA_mult = ~ exp(x - x[iinphase4]),
            #Estimate each treatment as multiple of static
            c(control_LSA_mult = ~ exp(x - x[icontrol4]),
            prob_LSA_static = ~ x<x[istatic4]))
 #Estimate probability treatment is less than static
 
 
-forms2_functions <- c("quantile", "quantile", "sum")
 
-forms2_functions <- c("quantile","quantile", "sum")
+forms2_functions <- c("quantile", "quantile", "quantile", "sum")
 
 
 gout <- simulate_gam_CIs(m3_crust_directs, 
@@ -339,9 +338,6 @@ crust_direct_effects[crust_direct_effects$Avg_LSA == mean(dat$Avg_LSA),]
 # at the static treatment
 crust_direct_effects[crust_direct_effects$Treatment == "StaticStatic",]
 crust_direct_effects[crust_direct_effects$Treatment == "InPhase",]
-
-
-crust_direct_effects[crust_direct_effects$Treatment == "Control",]
 
 
 crust_direct_effects
