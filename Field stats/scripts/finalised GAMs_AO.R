@@ -54,6 +54,56 @@ ggplot(predout$fit) +
   ylab("Model predictions \n change in shoot density per plot relative to day 0")
 
 
+
+#Treatment effects
+dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
+
+predout <- visreg(m1, xvar = "Week", 
+                  by = "Treatment",
+                  scale = "response",
+                  plot = FALSE,
+                  alpha = 0.05) # can plot directly with TRUE here
+# or have more control if you save results and plot with ggplot
+#returns results with 95% CIs (not SEs). 
+
+g1 <- ggplot(predout$fit) +
+  aes(x = Week, y = visregFit - Day0_density, color = Treatment,
+      group = Treatment, fill = Treatment)+ 
+  theme_cowplot()+
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr - Day0_density, ymax = visregUpr - Day0_density),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in shoot density per plot relative to day 0")
+
+
+
+#Block effects
+predout_block <- visreg(m1, xvar = "Week", 
+                        by = "Block",
+                        scale = "response",
+                        plot = FALSE,
+                        alpha = 0.05) # can plot directly with TRUE here
+
+
+g2 <- ggplot(predout_block$fit) +
+  aes(x = Week, y = visregFit - Day0_density, color = Block,
+      group = Block, fill = Block)+ 
+  theme_cowplot()+
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr - Day0_density, ymax = visregUpr - Day0_density),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in shoot density across experimental blocks")
+
+
+#magic of patchwork!
+
+g1 + g2 + plot_annotation(tag_levels = 'A')
+
+
 #leaf surface area
 #identify individual and interactive effects of treatment and week, random block effect
 dat$Treatment <- relevel(factor(dat$Treatment), ref = "StaticStatic")
@@ -88,6 +138,54 @@ ggplot(predout$fit) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
   xlab("Week")+
   ylab("Model predictions \n change in leaf surface area (cm^2) relative to day 0")
+
+
+#Treatment effects
+dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
+
+predout <- visreg(m2, xvar = "Week", 
+                  by = "Treatment",
+                  scale = "response",
+                  plot = FALSE,
+                  alpha = 0.05) # can plot directly with TRUE here
+# or have more control if you save results and plot with ggplot
+#returns results with 95% CIs (not SEs). 
+
+g1 <- ggplot(predout$fit) +
+  aes(x = Week, y = visregFit - Day0_Avg_LSA, color = Treatment,
+      group = Treatment, fill = Treatment)+ 
+  theme_cowplot()+
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr - Day0_Avg_LSA, ymax = visregUpr - Day0_Avg_LSA),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in leaf surface area (cm^2) relative to day 0")
+
+
+#Block effects
+predout_block <- visreg(m2, xvar = "Week", 
+                        by = "Block",
+                        scale = "response",
+                        plot = FALSE,
+                        alpha = 0.05) # can plot directly with TRUE here
+
+
+g2 <- ggplot(predout_block$fit) +
+  aes(x = Week, y = visregFit - Day0_Avg_LSA, color = Block,
+      group = Block, fill = Block)+ 
+  theme_cowplot()+
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr - Day0_Avg_LSA, ymax = visregUpr - Day0_Avg_LSA),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in leaf surface area across experimental blocks")
+
+
+#magic of patchwork!
+
+g1 + g2 + plot_annotation(tag_levels = 'A')
 
 
 #crustacean abundance
@@ -154,3 +252,52 @@ ggplot(predout$fit) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
   xlab("Week")+
   ylab("Model predictions \n change in crustacean abundance relative to day 0")
+
+
+#Treatment effects
+dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
+
+predout <- visreg(m3, xvar = "Week", 
+                  by = "Treatment",
+                  scale = "response",
+                  plot = FALSE,
+                  alpha = 0.05) # can plot directly with TRUE here
+# or have more control if you save results and plot with ggplot
+#returns results with 95% CIs (not SEs). 
+
+g1 <- ggplot(predout$fit) +
+  aes(x = Week, y = visregFit - Day0_crustacean, color = Treatment,
+      group = Treatment, fill = Treatment)+ 
+  theme_cowplot()+
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr - Day0_crustacean, ymax = visregUpr - Day0_crustacean),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in crustacean abundance relative to day 0")
+
+
+#Block effects
+predout_block <- visreg(m3, xvar = "Week", 
+                        by = "Block",
+                        scale = "response",
+                        plot = FALSE,
+                        alpha = 0.05) # can plot directly with TRUE here
+
+
+g2 <- ggplot(predout_block$fit) +
+  aes(x = Week, y = visregFit - Day0_crustacean, color = Block,
+      group = Block, fill = Block)+ 
+  theme_cowplot()+
+  geom_line() + 
+  geom_ribbon(aes(ymin = visregLwr - Day0_crustacean, ymax = visregUpr - Day0_crustacean),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in crustacean abundance across experimental blocks")
+
+
+#magic of patchwork!
+
+g1 + g2 + plot_annotation(tag_levels = 'A')
+

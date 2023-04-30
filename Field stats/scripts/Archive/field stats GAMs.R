@@ -94,11 +94,16 @@ predout <- visreg(m1, xvar = "Week",
 #returns results with 95% CIs (not SEs). 
 
 g1 <- ggplot(predout$fit) +
-  aes(x = Week, y = visregFit, color = Treatment,
+  aes(x = Week, y = visregFit - Day0_density, color = Treatment,
       group = Treatment, fill = Treatment)+ 
+  theme_cowplot()+
   geom_line() + 
-  geom_ribbon(aes(ymin = visregLwr, ymax = visregUpr),
-              alpha = 0.2, color = NA)
+  geom_ribbon(aes(ymin = visregLwr - Day0_density, ymax = visregUpr - Day0_density),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in shoot density per plot relative to day 0")
+
 
 
 #Block effects
@@ -110,11 +115,16 @@ predout_block <- visreg(m1, xvar = "Week",
 
 
 g2 <- ggplot(predout_block$fit) +
-  aes(x = Week, y = visregFit, color = Block,
+  aes(x = Week, y = visregFit - Day0_density, color = Block,
       group = Block, fill = Block)+ 
+  theme_cowplot()+
   geom_line() + 
-  geom_ribbon(aes(ymin = visregLwr, ymax = visregUpr),
-              alpha = 0.2, color = NA)
+  geom_ribbon(aes(ymin = visregLwr - Day0_density, ymax = visregUpr - Day0_density),
+              alpha = 0.2, color = NA)+
+  scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
+  xlab("Week")+
+  ylab("Model predictions \n change in shoot density across experimental blocks")
+
 
 #magic of patchwork!
 
