@@ -15,6 +15,7 @@ dat %>%
   (aes(x = Avg_LSA, y = Crustacean_abundance, colour = Treatment))+
   facet_grid(Treatment~Week)+
   geom_point(size = 2.5, position = position_dodge(0.8)) +
+  stat_smooth(se = FALSE)+
   theme_cowplot()+
   xlab("Leaf surface area (cm^2)")+
   ylab("Crustacean abundance")
