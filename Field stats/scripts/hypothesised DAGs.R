@@ -8,7 +8,7 @@ library(dagitty)
 library(ggdag)
 
 #read csv
-dat <- read.csv("../Data/DataStacked_Control.csv")
+dat <- read.csv("data/DataStacked_Control.csv")
 str(dat)
 dat$Stressor_app <- as.factor(dat$Stressor_app)
 dat$Treatment <- as.factor(dat$Treatment)
@@ -32,9 +32,6 @@ m1 <- dagitty( "dag {Treatment -> Shoot_density
                 Avg_LSA <-> Shoot_density
                 }" )
 plot(m1)
-
-#d-sep tests
-localTests(m1, dat, type="cis.chisq")
 
 #inspect paths between variables
 paths(m1, "Treatment", "Shoot_density", directed = FALSE)
@@ -70,9 +67,6 @@ m2 <- dagitty( "dag {Treatment -> Shoot_density
                 Avg_LSA <-> Shoot_density
                 }" )
 plot(m2)
-
-#d-sep tests
-localTests(m2, dat, type="cis.chisq")
 
 #inspect paths between variables
 paths(m2, "Treatment", "Shoot_density", directed = FALSE)
@@ -111,9 +105,6 @@ m3 <- dagitty( "dag {Treatment -> Shoot_density
                 Avg_LSA <-> Shoot_density
                 }" )
 plot(m3)
-
-#d-sep tests
-localTests(m3, dat, type="cis.chisq")
 
 #inspect paths between variables
 paths(m3, "Treatment", "Shoot_density", directed = FALSE)

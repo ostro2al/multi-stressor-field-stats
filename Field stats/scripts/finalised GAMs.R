@@ -7,9 +7,10 @@ library(tidyverse)
 library(mgcv)
 library(visreg)
 library(cowplot)
+library(patchwork)
 
 #read csv
-dat <- read.csv("../Data/Data_Control.csv")
+dat <- read.csv("data/Data_Control.csv")
 str(dat)
 dat <- data.frame(unclass(dat), stringsAsFactors = TRUE)
 str(dat)
@@ -62,9 +63,7 @@ predout <- visreg(m1, xvar = "Week",
                   by = "Treatment",
                   scale = "response",
                   plot = FALSE,
-                  alpha = 0.05) # can plot directly with TRUE here
-# or have more control if you save results and plot with ggplot
-#returns results with 95% CIs (not SEs). 
+                  alpha = 0.05) 
 
 g1 <- ggplot(predout$fit) +
   aes(x = Week, y = visregFit - Day0_density, color = Treatment,
@@ -98,8 +97,6 @@ g2 <- ggplot(predout_block$fit) +
   xlab("Week")+
   ylab("Model predictions \n change in shoot density across experimental blocks")
 
-
-#magic of patchwork!
 
 g1 + g2 + plot_annotation(tag_levels = 'A')
 
@@ -147,9 +144,7 @@ predout <- visreg(m2, xvar = "Week",
                   by = "Treatment",
                   scale = "response",
                   plot = FALSE,
-                  alpha = 0.05) # can plot directly with TRUE here
-# or have more control if you save results and plot with ggplot
-#returns results with 95% CIs (not SEs). 
+                  alpha = 0.05) 
 
 g1 <- ggplot(predout$fit) +
   aes(x = Week, y = visregFit - Day0_Avg_LSA, color = Treatment,
@@ -181,9 +176,6 @@ g2 <- ggplot(predout_block$fit) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
   xlab("Week")+
   ylab("Model predictions \n change in leaf surface area across experimental blocks")
-
-
-#magic of patchwork!
 
 g1 + g2 + plot_annotation(tag_levels = 'A')
 
@@ -261,9 +253,7 @@ predout <- visreg(m3, xvar = "Week",
                   by = "Treatment",
                   scale = "response",
                   plot = FALSE,
-                  alpha = 0.05) # can plot directly with TRUE here
-# or have more control if you save results and plot with ggplot
-#returns results with 95% CIs (not SEs). 
+                  alpha = 0.05) 
 
 g1 <- ggplot(predout$fit) +
   aes(x = Week, y = visregFit - Day0_crustacean, color = Treatment,
@@ -295,9 +285,6 @@ g2 <- ggplot(predout_block$fit) +
   scale_x_discrete(limits = c("1", "2", "3", "4", "5", "6"))+
   xlab("Week")+
   ylab("Model predictions \n change in crustacean abundance across experimental blocks")
-
-
-#magic of patchwork!
 
 g1 + g2 + plot_annotation(tag_levels = 'A')
 

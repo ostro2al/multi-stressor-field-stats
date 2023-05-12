@@ -10,9 +10,6 @@
 # therefore to estimate indirect effects we need to assume no shoot density effect
 # (so its not quite model 3)
 #
-# This should work now, but need to check I did matrix computations right way 
-# around. how can we run a test to check this works ok? 
-#Also have a I done the mean and exp() in the right order? 
 
 library(tidyverse)
 library(mgcv)
@@ -23,7 +20,7 @@ library(dagitty)
 #read csv
 dat <- read.csv("data/Data_Control.csv")
 
-#custon function
+#custom function
 source("scripts/functions-sim-predictions.R")
 
 #
@@ -33,12 +30,11 @@ nsims <- 1000
 k_val <- 4
 dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
 dat$ln_Day0_density <- log(dat$Day0_density)
-#log here rather than in the formula, makes using prediction
-# below more intuitive
 
-# ------------ 
-# Crusties mediation effect
-# ------------ 
+
+# 
+# Crustacean mediation effect
+# 
 # Calculated using method of Imai et al. 2010
 
 dat$ln_Day0_crustacean <- log(dat$Day0_crustacean+ 0.01)

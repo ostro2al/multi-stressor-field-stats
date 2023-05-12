@@ -9,12 +9,6 @@ library(visreg)
 library(cowplot)
 library(dagitty)
 
-#NB If you want to/can be bothered recreating your GAM graphs with 
-# credible intervals (won't make much or any difference) then
-# use code below but modify the creation of the prediction 
-# dataframe with expand.grid() to get all combinations of 
-# weeks and treatments. Then simulate predictions, calculate quantiles and finally 
-# then plot as normal with ggplot2
 
 #read csv
 dat <- read.csv("data/Data_Control.csv")
@@ -29,8 +23,6 @@ source("scripts/functions-sim-predictions.R")
 k_val <- 4
 dat$Treatment <- factor(dat$Treatment, levels = c("Control", "StaticStatic", "InPhase", "OutPhase"))
 dat$ln_Day0_density <- log(dat$Day0_density)
-#log here rather than in the formula, makes using prediction
-# below more intuitive
 
 #
 # Shoot density effect sizes 
@@ -51,11 +43,9 @@ newd <- with(dat, data.frame(Week = 6,
                    ln_Day0_density = mean(ln_Day0_density))
 )
 
-# newd$pred <- predict(m3.1, newdata = newd, type = "response")
-# newd
 
 
-#row IDs for treatments (so we don't mix them up)
+#row IDs for treatments
 icontrol <- which(newd$Treatment == "Control")
 istatic <- which(newd$Treatment == "StaticStatic")
 
@@ -105,8 +95,6 @@ shoot_density_effects
 # LSA
 #
 
-#TODO
-#AO trial LSA effects
 m3.2 <- gam(Avg_LSA ~ s(Week, by = Block, k = k_val) +
               Treatment + s(Week, by = Treatment, k = k_val) + 
               s(Block, bs = "re") + offset(Day0_Avg_LSA),
@@ -122,11 +110,7 @@ newd2 <- with(dat, data.frame(Week = 6,
                              Day0_Avg_LSA = mean(Day0_Avg_LSA))
 )
 
-# newd2$pred <- predict(m3.2, newdata = newd2, type = "response")
-# newd2
-
-
-#row IDs for treatments (so we don't mix them up)
+#row IDs for treatments
 icontrol2 <- which(newd2$Treatment == "Control")
 istatic2 <- which(newd2$Treatment == "StaticStatic")
 
@@ -174,9 +158,9 @@ LSA_effects
 
 
 
-# ------------ 
-# Crusties
-# ------------ 
+# 
+# Crustaceans
+# 
 
 
 #model 3
@@ -284,11 +268,6 @@ newd4 <- with(dat, expand.grid(Week = 6,
 )
 
 
-
-#Andria, decide on your comparisons (e.g. different treatments for mean LSA? and
-# different LSA for the static treatment?)
-# Then modify the which() and formulas below. an example included
-
 #set your condition, here all results will 
 #be multiples of static treatment and mean LSA
 
@@ -342,6 +321,3 @@ crust_direct_effects[crust_direct_effects$Treatment == "InPhase",]
 
 crust_direct_effects
 
-#
-# UP TO HERE< now get indirect effect of treatment on crusties
-#

@@ -8,7 +8,6 @@ library(mgcv)
 library(dagitty)
 
 #load csv
-#dat <- read.csv("../Data/DataStacked_Control.csv")
 dat <- read.csv("data/Data_Control.csv")
 str(dat)
 dat <- data.frame(unclass(dat), stringsAsFactors = TRUE)
